@@ -47,7 +47,7 @@
 		08FB7796FE84155DC02AAC07 /* AutoProtoMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AutoProtoMain.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32A70AAB03705E1F00C91783 /* AutoProto_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoProto_Prefix.pch; sourceTree = "<group>"; };
-		8DD76FA10486AA7600D96B5E /* AutoProto */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = AutoProto; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FA10486AA7600D96B5E /* CoMineCraft */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CoMineCraft; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859EA3029092ED04C91782 /* AutoProto.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = AutoProto.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -116,7 +116,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76FA10486AA7600D96B5E /* AutoProto */,
+				8DD76FA10486AA7600D96B5E /* CoMineCraft */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,9 +132,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8DD76F960486AA7600D96B5E /* AutoProto */ = {
+		8DD76F960486AA7600D96B5E /* CoMineCraft */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB927408733DD40010E9CD /* Build configuration list for PBXNativeTarget "AutoProto" */;
+			buildConfigurationList = 1DEB927408733DD40010E9CD /* Build configuration list for PBXNativeTarget "CoMineCraft" */;
 			buildPhases = (
 				8DD76F990486AA7600D96B5E /* Sources */,
 				8DD76F9B0486AA7600D96B5E /* Frameworks */,
@@ -144,10 +144,10 @@
 			);
 			dependencies = (
 			);
-			name = AutoProto;
+			name = CoMineCraft;
 			productInstallPath = "$(HOME)/bin";
 			productName = AutoProto;
-			productReference = 8DD76FA10486AA7600D96B5E /* AutoProto */;
+			productReference = 8DD76FA10486AA7600D96B5E /* CoMineCraft */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -155,7 +155,7 @@
 /* Begin PBXProject section */
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
-			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "AutoProto" */;
+			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "CoMineCraft" */;
 			compatibilityVersion = "Xcode 3.1";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -169,7 +169,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8DD76F960486AA7600D96B5E /* AutoProto */,
+				8DD76F960486AA7600D96B5E /* CoMineCraft */,
 			);
 		};
 /* End PBXProject section */
@@ -202,7 +202,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = AutoProto_Prefix.pch;
 				INSTALL_PATH = /usr/local/bin;
-				PRODUCT_NAME = AutoProto;
+				PRODUCT_NAME = CoMineCraft;
 			};
 			name = Debug;
 		};
@@ -252,7 +252,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB927408733DD40010E9CD /* Build configuration list for PBXNativeTarget "AutoProto" */ = {
+		1DEB927408733DD40010E9CD /* Build configuration list for PBXNativeTarget "CoMineCraft" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB927508733DD40010E9CD /* Debug */,
@@ -261,7 +261,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "AutoProto" */ = {
+		1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "CoMineCraft" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB927908733DD40010E9CD /* Debug */,
