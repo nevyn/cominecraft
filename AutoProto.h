@@ -5,6 +5,7 @@
 
 // Synthesizes -[dealloc] and -[description]
 @interface APMessage : NSObject
++(uint8_t)packetId;
 @end
 
 
@@ -23,8 +24,8 @@ typedef Class(*APMessageFactory)(uint8_t packetId);
 	APMessageFactory factory;
 }
 @property (assign) id delegate;
--(id)initWithSocket:(AsyncSocket*)sck messageFactory:(APMessageFactory)factory;
-//-(void)sendMessage:(APMessage*)msg;
+-(id)initWithSocket:(AsyncSocket*)sck receivedMessageFactory:(APMessageFactory)factory;
+-(void)sendMessage:(APMessage*)msg;
 @end
 
 
@@ -57,8 +58,6 @@ typedef Class(*APMessageFactory)(uint8_t packetId);
 
 
 
-
-
 #pragma mark 
 #pragma mark Base implementations
 @interface APReaderNSString : APMessagePartReaderBase 
@@ -68,7 +67,8 @@ typedef Class(*APMessageFactory)(uint8_t packetId);
 			 delegate:delegate;
 @end
 
+@interface APWriterNSString : NSObject
++(NSData*)dataForKey:(NSString*)key ofMessage:(APMessage*)msg;
+@end
 
-#pragma mark 
-#pragma mark Helpers
-NSString *APTypeEncodingInPropertyAttribs(NSString *attrs);
+

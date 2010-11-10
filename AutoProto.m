@@ -23,12 +23,31 @@
 -(void)tellDelegateWeAreDoneOnSocket:(AsyncSocket*)sck;
 @end
 
+@interface APMessageWriter : NSObject
++(void)writeMessage:(APMessage*)msg toSocket:(AsyncSocket*)sck;
+@end
+
+NSString *APTypeEncodingInPropertyAttribs(NSString *attrs);
+Class APClassFromIdTypeEncoding(NSString *prefix, NSString *idTypeEncoding);
+size_t APSizeOfType(NSString *typeEncoding);
+typedef enum { SwapBtoN, SwapNtoB } SwapDirection;
+void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirection direction);
+
+@interface NSObject (APAccessors)
+-(NSInvocation*)ap_setterForKey:(NSString*)name;
+-(NSInvocation*)ap_getterForKey:(NSString*)name;
+@end
 
 #pragma mark 
 #pragma mark Infrastructure
 #pragma mark -
 
 @implementation APMessage
++(uint8_t)packetId;
+{
+	[NSException raise:NSInvalidArgumentException format:@"+[%@ packetId] not implemented", NSStringFromClass(self)];
+	return 0;
+}
 -(void)dealloc;
 {
 	objc_property_t *props; unsigned int c;	
@@ -95,7 +114,7 @@
 
 @implementation APProtoTalker
 @synthesize delegate;
--(id)initWithSocket:(AsyncSocket*)sock messageFactory:(APMessageFactory)factory_;
+-(id)initWithSocket:(AsyncSocket*)sock receivedMessageFactory:(APMessageFactory)factory_;
 {
 	sck = [sock retain];
 	sck.delegate = self;
@@ -105,11 +124,15 @@
 	
 	return self;
 }
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
+- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(uintptr_t)tag
 {
 	uint8_t packet = *(uint8_t*)[data bytes];
 	
 	APMessage *msg = [[[factory(packet) alloc] init] autorelease];
+	if(!msg) {
+		[NSException raise:NSInvalidArgumentException format:@"Unknown packet id encountered: 0x%x", packet];
+		return;
+	}
 	[[APMessageReader alloc] initWithMessage:msg fromSocket:sck whenDone:self];
 }
 - (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err;
@@ -119,9 +142,29 @@
 -(void)messageReader:(id)reader doneReadingMessage:(APMessage*)msg;
 {
 	sck.delegate = self;
-	[delegate protoTalker:self receivedMessage:msg];
+	NSString *specificSelName = [NSString stringWithFormat:@"protoTalker:received%@:", NSStringFromClass([msg class])];
+	SEL specificSel = NSSelectorFromString(specificSelName);
+	if(specificSel && [delegate respondsToSelector:specificSel]) {
+		NSMethodSignature *sig = [delegate methodSignatureForSelector:specificSel];
+		NSInvocation *ivc = [NSInvocation invocationWithMethodSignature:sig];
+		[ivc setSelector:specificSel];
+		[ivc setArgument:&self atIndex:2];
+		[ivc setArgument:&msg atIndex:3];
+		[ivc invokeWithTarget:delegate];
+	} else {
+		[delegate protoTalker:self receivedMessage:msg];
+	}
+	
 	[reader release];
 	[sck readDataToLength:sizeof(uint8_t) withTimeout:-1 tag:0];
+}
+-(void)sendMessage:(APMessage*)msg;
+{
+	[APMessageWriter writeMessage:msg toSocket:sck];
+}
+-(void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(uintptr_t)tag;
+{
+	[delegate protoTalker:self sentMessage:(id)tag];
 }
 @end
 
@@ -164,25 +207,13 @@
 	objc_property_t prop = [self propAtIndex:field];
 	NSString *attrs = [NSString stringWithUTF8String:property_getAttributes(prop)];
 	NSString *typeEncoding = APTypeEncodingInPropertyAttribs(attrs);
-	NSString *name = [NSString stringWithUTF8String:property_getName(prop)];
 	
-	int length = 0;
-	if([[typeEncoding uppercaseString] isEqual:@"C"]) length = 1;
-	else if([[typeEncoding uppercaseString] isEqual:@"S"]) length = 2;
-	else if([[typeEncoding uppercaseString] isEqual:@"I"]) length = 4;
-	else if([typeEncoding isEqual:@"f"]) length = 4;
-	else if([[typeEncoding uppercaseString] isEqual:@"Q"]) length = 8;
-	else if([typeEncoding isEqual:@"d"]) length = 8;
-	else if([typeEncoding hasPrefix:@"@"]) {
-		NSString *className = [typeEncoding substringFromIndex:2];
-		className = [className substringToIndex:[className rangeOfString:@"\""].location];
-		NSString *readerClassName = [@"APReader" stringByAppendingString:className];
-		Class readerClass = NSClassFromString(readerClassName);
-		if(!readerClass) [NSException raise:NSInvalidArgumentException format:@"No APReader for property %@ of class %@", name, className];
-		
+	if([typeEncoding hasPrefix:@"@"]) {
+		Class readerClass = APClassFromIdTypeEncoding(@"APReader", typeEncoding);
 		[[readerClass alloc] initReadingField:field ofMessage:message fromSocket:sck delegate:self];
 		return;
-	} else [NSException raise:NSInvalidArgumentException format:@"Unknown type encoding %@ for prop %@", typeEncoding, name];
+	}
+	size_t length = APSizeOfType(typeEncoding);
 		
 	[sck readDataToLength:length withTimeout:-1 tag:field];
 }
@@ -211,29 +242,20 @@
 	else
 		[self readField:field+1 onSocket:sck];
 }
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)nsdata withTag:(long)field
+- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)nsdata withTag:(uintptr_t)field
 {
 	objc_property_t prop = [self propAtIndex:field];
 	NSString *attrs = [NSString stringWithUTF8String:property_getAttributes(prop)];
-	NSString *typeEncoding = [attrs substringWithRange:NSMakeRange(1, [attrs rangeOfString:@","].location-1)];
+	NSString *typeEncoding = APTypeEncodingInPropertyAttribs(attrs);
 	NSString *name = [NSString stringWithUTF8String:property_getName(prop)];
-	uint8_t data[[nsdata length]];
-	memcpy(data, [nsdata bytes], [nsdata length]);
-#define swapIf(encoding, type, conversionMethod) if([typeEncoding isEqual:encoding]) { type converted = conversionMethod(*((type*)data)); memcpy(&data, &converted, [nsdata length]); }
-	swapIf(@"s", int16_t, EndianS16_BtoN)
-	else swapIf(@"S", uint16_t, EndianU16_BtoN)
-	else swapIf(@"i", int32_t, EndianS32_BtoN)
-	else swapIf(@"I", uint32_t, EndianU32_BtoN)
-	else swapIf(@"q", int64_t, EndianS64_BtoN)
-	else swapIf(@"Q", uint64_t, EndianU64_BtoN)
 	
-	NSString *setterName = [NSString stringWithFormat:@"set%@%@:", [[name substringToIndex:1] uppercaseString], [name substringFromIndex:1]];
-	SEL setter = NSSelectorFromString(setterName);
-	NSMethodSignature *sig = [message methodSignatureForSelector:setter];	
-	NSInvocation *ivc = [NSInvocation invocationWithMethodSignature:sig];
+	uint8_t data[[nsdata length]];
+	[nsdata getBytes:data length:[nsdata length]];
+	APSwapInPlace(data, typeEncoding, [nsdata length], SwapBtoN);
+	
+	NSInvocation *ivc = [message ap_setterForKey:name];
 	[ivc setArgument:data atIndex:2];
-	[ivc setSelector:setter];
-	[ivc invokeWithTarget:message];
+	[ivc invoke];
 	
 	if(field+1 == c)
 		[delegate messageReader:self doneReadingMessage:message];
@@ -253,6 +275,39 @@
 }
 @end
 
+@implementation APMessageWriter
++(void)writeMessage:(APMessage*)message toSocket:(AsyncSocket*)sck;
+{
+	uint8_t packet = [[message class] packetId];
+	NSMutableData *d = [NSMutableData dataWithBytes:&packet length:1];
+	
+	unsigned c;
+	objc_property_t *props = class_copyPropertyList([message class], &c);
+	for(int i = c; i > 0; i--) {
+		objc_property_t prop = props[i-1];
+		NSString *attrs = [NSString stringWithUTF8String:property_getAttributes(prop)];
+		NSString *typeEncoding = APTypeEncodingInPropertyAttribs(attrs);
+		NSString *name = [NSString stringWithUTF8String:property_getName(prop)];
+		
+		if([typeEncoding hasPrefix:@"@"]) {
+			Class writerClass = APClassFromIdTypeEncoding(@"APWriter", typeEncoding);
+			[d appendData:[writerClass dataForKey:name ofMessage:message]];
+		} else {
+			size_t len = APSizeOfType(typeEncoding);
+			uint8_t data[len];
+			NSInvocation *ivc = [message ap_getterForKey:name];
+			[ivc invoke];
+			[ivc getReturnValue:data];
+			APSwapInPlace(data, typeEncoding, len, SwapNtoB);
+			[d appendData:[NSData dataWithBytes:data length:len]];
+		}
+	}
+	
+	[sck writeData:d withTimeout:-1 tag:(uintptr_t)message];
+}
+@end
+
+
 
 #pragma mark 
 #pragma mark Base implementations
@@ -271,11 +326,11 @@ enum { ReadingLength, ReadingData};
 
 	return self;
 }
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)nsdata withTag:(long)tag
+- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)nsdata withTag:(uintptr_t)tag
 {
 	if(tag == ReadingLength) {
 		uint16_t len;
-		memcpy(&len, [nsdata bytes], 2);
+		[nsdata getBytes:&len length:2];
 		len = EndianU16_BtoN(len);
 		[sock readDataToLength:len withTimeout:-1 tag:ReadingData];
 	} else if(tag == ReadingData) {
@@ -285,6 +340,16 @@ enum { ReadingLength, ReadingData};
 }
 @end
 
+@implementation APWriterNSString
++(NSData*)dataForKey:(NSString*)key ofMessage:(APMessage*)msg;
+{
+	NSString *str = [msg valueForKey:key];
+	uint16_t len = EndianU16_NtoB([str length]);
+	NSMutableData *d = [NSMutableData dataWithBytes:&len length:2];
+	[d appendData:[str dataUsingEncoding:NSUTF8StringEncoding]];
+	return d;
+}
+@end
 #pragma mark 
 #pragma mark Helpers
 #pragma mark -
@@ -293,3 +358,68 @@ NSString *APTypeEncodingInPropertyAttribs(NSString *attrs)
 {
 	return [attrs substringWithRange:NSMakeRange(1, [attrs rangeOfString:@","].location-1)];
 }
+
+Class APClassFromIdTypeEncoding(NSString *prefix, NSString *typeEncoding)
+{
+	NSString *className = [typeEncoding substringFromIndex:2];
+	className = [className substringToIndex:[className rangeOfString:@"\""].location];
+	
+	NSString *modClassName = [prefix stringByAppendingString:className];
+	Class modClass = NSClassFromString(modClassName);
+	if(!modClass) [NSException raise:NSInvalidArgumentException format:@"No %@ found for %@", prefix, className];
+	return modClass;
+}
+
+size_t APSizeOfType(NSString *typeEncoding)
+{
+	if([[typeEncoding uppercaseString] isEqual:@"C"]) return 1;
+	else if([[typeEncoding uppercaseString] isEqual:@"S"]) return 2;
+	else if([[typeEncoding uppercaseString] isEqual:@"I"]) return 4;
+	else if([typeEncoding isEqual:@"f"]) return 4;
+	else if([[typeEncoding uppercaseString] isEqual:@"Q"]) return 8;
+	else if([typeEncoding isEqual:@"d"]) return 8;
+	[NSException raise:NSInvalidArgumentException format:@"No size for type encoding %@ available", typeEncoding];
+	return 0;
+}
+
+void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirection direction) {
+	#define swapIf(encoding, type, conversionMethodNtoB, conversionMethodBtoN) \
+		if([typeEncoding isEqual:encoding]) { \
+			type converted; \
+			if(direction ==SwapBtoN)\
+				converted = conversionMethodBtoN(*((type*)data)); \
+			else \
+				converted = conversionMethodNtoB(*((type*)data)); \
+			memcpy(data, &converted, length); \
+		}
+	
+	swapIf(@"s", int16_t, EndianS16_NtoB, EndianS16_BtoN)
+	else swapIf(@"S", uint16_t, EndianU16_NtoB, EndianU16_BtoN)
+	else swapIf(@"i", int32_t, EndianS32_NtoB, EndianS32_BtoN)
+	else swapIf(@"I", uint32_t, EndianU32_NtoB, EndianU32_BtoN)
+	else swapIf(@"q", int64_t, EndianS64_NtoB, EndianS64_BtoN)
+	else swapIf(@"Q", uint64_t, EndianU64_NtoB, EndianU64_BtoN)
+	#undef swapIf
+}
+
+@implementation NSObject (APAccessors)
+-(NSInvocation*)ap_setterForKey:(NSString*)name;
+{
+	NSString *setterName = [NSString stringWithFormat:@"set%@%@:", [[name substringToIndex:1] uppercaseString], [name substringFromIndex:1]];
+	SEL setter = NSSelectorFromString(setterName);
+	NSMethodSignature *sig = [self methodSignatureForSelector:setter];	
+	NSInvocation *ivc = [NSInvocation invocationWithMethodSignature:sig];
+	[ivc setTarget:self];
+	[ivc setSelector:setter];
+	return ivc;
+}
+-(NSInvocation*)ap_getterForKey:(NSString*)name;
+{
+	SEL getter = NSSelectorFromString(name);
+	NSMethodSignature *sig = [self methodSignatureForSelector:getter];
+	NSInvocation *ivc = [NSInvocation invocationWithMethodSignature:sig];
+	[ivc setTarget:self];
+	[ivc setSelector:getter];
+	return ivc;
+}
+@end
