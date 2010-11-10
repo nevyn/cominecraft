@@ -5,7 +5,7 @@
 
 @interface MinecraftClient : NSObject {
 	AsyncSocket *sck;
-	APProtoTalker *talker;
+	APProtoTalker *_talker;
 }
 -(id)initTo:(NSString*)host error:(NSError**)err;
 @end
