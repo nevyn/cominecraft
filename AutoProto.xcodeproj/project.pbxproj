@@ -11,6 +11,9 @@
 		05D032301289E2D100B95B50 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05D0322F1289E2D100B95B50 /* SystemConfiguration.framework */; };
 		05D0326C1289E61A00B95B50 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05D0326B1289E61A00B95B50 /* AppKit.framework */; };
 		05D032D21289F09B00B95B50 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05D032D11289F09B00B95B50 /* CoreServices.framework */; };
+		05D0342A128A8E9F00B95B50 /* AutoProto.m in Sources */ = {isa = PBXBuildFile; fileRef = 05D03429128A8E9F00B95B50 /* AutoProto.m */; };
+		05D0342D128A8EC300B95B50 /* MinecraftMessages.m in Sources */ = {isa = PBXBuildFile; fileRef = 05D0342C128A8EC300B95B50 /* MinecraftMessages.m */; };
+		05D03430128A8ED200B95B50 /* MinecraftClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 05D0342F128A8ED200B95B50 /* MinecraftClient.m */; };
 		8DD76F9A0486AA7600D96B5E /* AutoProtoMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* AutoProtoMain.m */; settings = {ATTRIBUTES = (); }; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
 		8DD76F9F0486AA7600D96B5E /* AutoProto.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859EA3029092ED04C91782 /* AutoProto.1 */; };
@@ -35,6 +38,12 @@
 		05D0322F1289E2D100B95B50 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		05D0326B1289E61A00B95B50 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		05D032D11289F09B00B95B50 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		05D03428128A8E9F00B95B50 /* AutoProto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoProto.h; sourceTree = "<group>"; };
+		05D03429128A8E9F00B95B50 /* AutoProto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AutoProto.m; sourceTree = "<group>"; };
+		05D0342B128A8EC300B95B50 /* MinecraftMessages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinecraftMessages.h; sourceTree = "<group>"; };
+		05D0342C128A8EC300B95B50 /* MinecraftMessages.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MinecraftMessages.m; sourceTree = "<group>"; };
+		05D0342E128A8ED200B95B50 /* MinecraftClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinecraftClient.h; sourceTree = "<group>"; };
+		05D0342F128A8ED200B95B50 /* MinecraftClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MinecraftClient.m; sourceTree = "<group>"; };
 		08FB7796FE84155DC02AAC07 /* AutoProtoMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AutoProtoMain.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32A70AAB03705E1F00C91783 /* AutoProto_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoProto_Prefix.pch; sourceTree = "<group>"; };
@@ -57,6 +66,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		05D03427128A8E9000B95B50 /* Minecraft */ = {
+			isa = PBXGroup;
+			children = (
+				05D0342B128A8EC300B95B50 /* MinecraftMessages.h */,
+				05D0342C128A8EC300B95B50 /* MinecraftMessages.m */,
+				05D0342E128A8ED200B95B50 /* MinecraftClient.h */,
+				05D0342F128A8ED200B95B50 /* MinecraftClient.m */,
+			);
+			name = Minecraft;
+			sourceTree = "<group>";
+		};
 		08FB7794FE84155DC02AAC07 /* AutoProto */ = {
 			isa = PBXGroup;
 			children = (
@@ -71,6 +91,9 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				05D03427128A8E9000B95B50 /* Minecraft */,
+				05D03428128A8E9F00B95B50 /* AutoProto.h */,
+				05D03429128A8E9F00B95B50 /* AutoProto.m */,
 				32A70AAB03705E1F00C91783 /* AutoProto_Prefix.pch */,
 				08FB7796FE84155DC02AAC07 /* AutoProtoMain.m */,
 				0556E9CF1289D6E600EC4D2F /* AsyncSocket.h */,
@@ -158,6 +181,9 @@
 			files = (
 				8DD76F9A0486AA7600D96B5E /* AutoProtoMain.m in Sources */,
 				0556E9D11289D6E600EC4D2F /* AsyncSocket.m in Sources */,
+				05D0342A128A8E9F00B95B50 /* AutoProto.m in Sources */,
+				05D0342D128A8EC300B95B50 /* MinecraftMessages.m in Sources */,
+				05D03430128A8ED200B95B50 /* MinecraftClient.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
