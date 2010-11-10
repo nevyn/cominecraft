@@ -185,7 +185,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 	NSData *term;
 	BOOL bufferOwner;
 	NSUInteger originalBufferLength;
-	long tag;
+	uintptr_t tag;
 }
 - (id)initWithData:(NSMutableData *)d
        startOffset:(NSUInteger)s
@@ -193,7 +193,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
            timeout:(NSTimeInterval)t
         readLength:(NSUInteger)l
         terminator:(NSData *)e
-               tag:(long)i;
+               tag:(uintptr_t)i;
 
 - (NSUInteger)readLengthForNonTerm;
 - (NSUInteger)readLengthForTerm;
@@ -211,7 +211,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
            timeout:(NSTimeInterval)t
         readLength:(NSUInteger)l
         terminator:(NSData *)e
-               tag:(long)i
+               tag:(uintptr_t)i
 {
 	if((self = [super init]))
 	{
@@ -602,15 +602,15 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
   @public
 	NSData *buffer;
 	NSUInteger bytesDone;
-	long tag;
+	uintptr_t tag;
 	NSTimeInterval timeout;
 }
-- (id)initWithData:(NSData *)d timeout:(NSTimeInterval)t tag:(long)i;
+- (id)initWithData:(NSData *)d timeout:(NSTimeInterval)t tag:(uintptr_t)i;
 @end
 
 @implementation AsyncWritePacket
 
-- (id)initWithData:(NSData *)d timeout:(NSTimeInterval)t tag:(long)i
+- (id)initWithData:(NSData *)d timeout:(NSTimeInterval)t tag:(uintptr_t)i
 {
 	if((self = [super init]))
 	{
@@ -792,7 +792,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 #pragma mark Progress
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (float)progressOfReadReturningTag:(long *)tag bytesDone:(NSUInteger *)done total:(NSUInteger *)total
+- (float)progressOfReadReturningTag:(uintptr_t *)tag bytesDone:(NSUInteger *)done total:(NSUInteger *)total
 {
 	// Check to make sure we're actually reading something right now,
 	// and that the read packet isn't an AsyncSpecialPacket (upgrade to TLS).
@@ -822,7 +822,7 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 		return 1.0F;
 }
 
-- (float)progressOfWriteReturningTag:(long *)tag bytesDone:(NSUInteger *)done total:(NSUInteger *)total
+- (float)progressOfWriteReturningTag:(uintptr_t *)tag bytesDone:(NSUInteger *)done total:(NSUInteger *)total
 {
 	// Check to make sure we're actually writing something right now,
 	// and that the write packet isn't an AsyncSpecialPacket (upgrade to TLS).
@@ -3182,7 +3182,7 @@ Failed:
 #pragma mark Reading
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)readDataWithTimeout:(NSTimeInterval)timeout tag:(long)tag
+- (void)readDataWithTimeout:(NSTimeInterval)timeout tag:(uintptr_t)tag
 {
 	[self readDataWithTimeout:timeout buffer:nil bufferOffset:0 maxLength:0 tag:tag];
 }
@@ -3190,7 +3190,7 @@ Failed:
 - (void)readDataWithTimeout:(NSTimeInterval)timeout
                      buffer:(NSMutableData *)buffer
                bufferOffset:(NSUInteger)offset
-                        tag:(long)tag
+                        tag:(uintptr_t)tag
 {
 	[self readDataWithTimeout:timeout buffer:buffer bufferOffset:offset maxLength:0 tag:tag];
 }
@@ -3199,7 +3199,7 @@ Failed:
                      buffer:(NSMutableData *)buffer
                bufferOffset:(NSUInteger)offset
                   maxLength:(NSUInteger)length
-                        tag:(long)tag
+                        tag:(uintptr_t)tag
 {
 	if (offset > [buffer length]) return;
 	if (theFlags & kForbidReadsWrites) return;
@@ -3217,7 +3217,7 @@ Failed:
 	[packet release];
 }
 
-- (void)readDataToLength:(NSUInteger)length withTimeout:(NSTimeInterval)timeout tag:(long)tag
+- (void)readDataToLength:(NSUInteger)length withTimeout:(NSTimeInterval)timeout tag:(uintptr_t)tag
 {
 	[self readDataToLength:length withTimeout:timeout buffer:nil bufferOffset:0 tag:tag];
 }
@@ -3226,7 +3226,7 @@ Failed:
              withTimeout:(NSTimeInterval)timeout
                   buffer:(NSMutableData *)buffer
             bufferOffset:(NSUInteger)offset
-                     tag:(long)tag
+                     tag:(uintptr_t)tag
 {
 	if (length == 0) return;
 	if (offset > [buffer length]) return;
@@ -3245,7 +3245,7 @@ Failed:
 	[packet release];
 }
 
-- (void)readDataToData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(long)tag
+- (void)readDataToData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(uintptr_t)tag
 {
 	[self readDataToData:data withTimeout:timeout buffer:nil bufferOffset:0 maxLength:0 tag:tag];
 }
@@ -3254,12 +3254,12 @@ Failed:
            withTimeout:(NSTimeInterval)timeout
                 buffer:(NSMutableData *)buffer
           bufferOffset:(NSUInteger)offset
-                   tag:(long)tag
+                   tag:(uintptr_t)tag
 {
 	[self readDataToData:data withTimeout:timeout buffer:buffer bufferOffset:offset maxLength:0 tag:tag];
 }
 
-- (void)readDataToData:(NSData *)data withTimeout:(NSTimeInterval)timeout maxLength:(NSUInteger)length tag:(long)tag
+- (void)readDataToData:(NSData *)data withTimeout:(NSTimeInterval)timeout maxLength:(NSUInteger)length tag:(uintptr_t)tag
 {
 	[self readDataToData:data withTimeout:timeout buffer:nil bufferOffset:0 maxLength:length tag:tag];
 }
@@ -3269,7 +3269,7 @@ Failed:
                 buffer:(NSMutableData *)buffer
           bufferOffset:(NSUInteger)offset
              maxLength:(NSUInteger)length
-                   tag:(long)tag
+                   tag:(uintptr_t)tag
 {
 	if (data == nil || [data length] == 0) return;
 	if (offset > [buffer length]) return;
@@ -3725,7 +3725,7 @@ Failed:
 #pragma mark Writing
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)writeData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(long)tag
+- (void)writeData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(uintptr_t)tag
 {
 	if (data == nil || [data length] == 0) return;
 	if (theFlags & kForbidReadsWrites) return;

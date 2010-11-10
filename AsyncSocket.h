@@ -83,25 +83,25 @@ typedef enum AsyncSocketError AsyncSocketError;
  * Called when a socket has completed reading the requested data into memory.
  * Not called if there is an error.
 **/
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag;
+- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(uintptr_t)tag;
 
 /**
  * Called when a socket has read in data, but has not yet completed the read.
  * This would occur if using readToData: or readToLength: methods.
  * It may be used to for things such as updating progress bars.
 **/
-- (void)onSocket:(AsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(long)tag;
+- (void)onSocket:(AsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(uintptr_t)tag;
 
 /**
  * Called when a socket has completed writing the requested data. Not called if there is an error.
 **/
-- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag;
+- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(uintptr_t)tag;
 
 /**
  * Called when a socket has written some data, but has not yet completed the entire write.
  * It may be used to for things such as updating progress bars.
 **/
-- (void)onSocket:(AsyncSocket *)sock didWritePartialDataOfLength:(NSUInteger)partialLength tag:(long)tag;
+- (void)onSocket:(AsyncSocket *)sock didWritePartialDataOfLength:(NSUInteger)partialLength tag:(uintptr_t)tag;
 
 /**
  * Called if a read operation has reached its timeout without completing.
@@ -115,7 +115,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * Note that this method may be called multiple times for a single read if you return positive numbers.
 **/
 - (NSTimeInterval)onSocket:(AsyncSocket *)sock
-  shouldTimeoutReadWithTag:(long)tag
+  shouldTimeoutReadWithTag:(uintptr_t)tag
                    elapsed:(NSTimeInterval)elapsed
                  bytesDone:(NSUInteger)length;
 
@@ -131,7 +131,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * Note that this method may be called multiple times for a single write if you return positive numbers.
 **/
 - (NSTimeInterval)onSocket:(AsyncSocket *)sock
- shouldTimeoutWriteWithTag:(long)tag
+ shouldTimeoutWriteWithTag:(uintptr_t)tag
                    elapsed:(NSTimeInterval)elapsed
                  bytesDone:(NSUInteger)length;
 
@@ -364,7 +364,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * 
  * If the timeout value is negative, the read operation will not use a timeout.
 **/
-- (void)readDataWithTimeout:(NSTimeInterval)timeout tag:(long)tag;
+- (void)readDataWithTimeout:(NSTimeInterval)timeout tag:(uintptr_t)tag;
 
 /**
  * Reads the first available bytes that become available on the socket.
@@ -384,7 +384,7 @@ typedef enum AsyncSocketError AsyncSocketError;
 - (void)readDataWithTimeout:(NSTimeInterval)timeout
 					 buffer:(NSMutableData *)buffer
 			   bufferOffset:(NSUInteger)offset
-						tag:(long)tag;
+						tag:(uintptr_t)tag;
 
 /**
  * Reads the first available bytes that become available on the socket.
@@ -407,7 +407,7 @@ typedef enum AsyncSocketError AsyncSocketError;
                      buffer:(NSMutableData *)buffer
                bufferOffset:(NSUInteger)offset
                   maxLength:(NSUInteger)length
-                        tag:(long)tag;
+                        tag:(uintptr_t)tag;
 
 /**
  * Reads the given number of bytes.
@@ -416,7 +416,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * 
  * If the length is 0, this method does nothing and the delegate is not called.
 **/
-- (void)readDataToLength:(NSUInteger)length withTimeout:(NSTimeInterval)timeout tag:(long)tag;
+- (void)readDataToLength:(NSUInteger)length withTimeout:(NSTimeInterval)timeout tag:(uintptr_t)tag;
 
 /**
  * Reads the given number of bytes.
@@ -438,7 +438,7 @@ typedef enum AsyncSocketError AsyncSocketError;
              withTimeout:(NSTimeInterval)timeout
                   buffer:(NSMutableData *)buffer
             bufferOffset:(NSUInteger)offset
-                     tag:(long)tag;
+                     tag:(uintptr_t)tag;
 
 /**
  * Reads bytes until (and including) the passed "data" parameter, which acts as a separator.
@@ -452,7 +452,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * Note that this method is not character-set aware, so if a separator can occur naturally as part of the encoding for
  * a character, the read will prematurely end.
 **/
-- (void)readDataToData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(long)tag;
+- (void)readDataToData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(uintptr_t)tag;
 
 /**
  * Reads bytes until (and including) the passed "data" parameter, which acts as a separator.
@@ -477,7 +477,7 @@ typedef enum AsyncSocketError AsyncSocketError;
            withTimeout:(NSTimeInterval)timeout
                 buffer:(NSMutableData *)buffer
           bufferOffset:(NSUInteger)offset
-                   tag:(long)tag;
+                   tag:(uintptr_t)tag;
 
 /**
  * Reads bytes until (and including) the passed "data" parameter, which acts as a separator.
@@ -498,7 +498,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * Note that this method is not character-set aware, so if a separator can occur naturally as part of the encoding for
  * a character, the read will prematurely end.
 **/
-- (void)readDataToData:(NSData *)data withTimeout:(NSTimeInterval)timeout maxLength:(NSUInteger)length tag:(long)tag;
+- (void)readDataToData:(NSData *)data withTimeout:(NSTimeInterval)timeout maxLength:(NSUInteger)length tag:(uintptr_t)tag;
 
 /**
  * Reads bytes until (and including) the passed "data" parameter, which acts as a separator.
@@ -532,7 +532,7 @@ typedef enum AsyncSocketError AsyncSocketError;
                 buffer:(NSMutableData *)buffer
           bufferOffset:(NSUInteger)offset
              maxLength:(NSUInteger)length
-                   tag:(long)tag;
+                   tag:(uintptr_t)tag;
 
 /**
  * Writes data to the socket, and calls the delegate when finished.
@@ -540,14 +540,14 @@ typedef enum AsyncSocketError AsyncSocketError;
  * If you pass in nil or zero-length data, this method does nothing and the delegate will not be called.
  * If the timeout value is negative, the write operation will not use a timeout.
 **/
-- (void)writeData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(long)tag;
+- (void)writeData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(uintptr_t)tag;
 
 /**
  * Returns progress of current read or write, from 0.0 to 1.0, or NaN if no read/write (use isnan() to check).
  * "tag", "done" and "total" will be filled in if they aren't NULL.
 **/
-- (float)progressOfReadReturningTag:(long *)tag bytesDone:(NSUInteger *)done total:(NSUInteger *)total;
-- (float)progressOfWriteReturningTag:(long *)tag bytesDone:(NSUInteger *)done total:(NSUInteger *)total;
+- (float)progressOfReadReturningTag:(uintptr_t *)tag bytesDone:(NSUInteger *)done total:(NSUInteger *)total;
+- (float)progressOfWriteReturningTag:(uintptr_t *)tag bytesDone:(NSUInteger *)done total:(NSUInteger *)total;
 
 /**
  * Secures the connection using SSL/TLS.
