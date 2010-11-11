@@ -63,6 +63,12 @@ Class MinecraftMessageFactoryCS(uint8_t packetId)
 @synthesize timeInMinutes;
 @end
 
+@implementation SCKick
++(uint8_t)packetId; { return 0xff; }
+@synthesize reason;
+@end
+
+
 Class MinecraftMessageFactorySC(uint8_t packetId)
 {
 	static Class messages[0xff+1] = {Nil};
@@ -73,6 +79,7 @@ Class MinecraftMessageFactorySC(uint8_t packetId)
 		insert(SCHandshake);
 		insert(SCChatMessage);
 		insert(SCTimeUpdate);
+		insert(SCKick);
 		inited = YES;
 	}
 	return messages[packetId];

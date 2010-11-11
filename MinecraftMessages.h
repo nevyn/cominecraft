@@ -51,4 +51,8 @@ Class MinecraftMessageFactoryCS(uint8_t packetId);
 @property uint64_t timeInMinutes;
 @end
 
+@interface SCKick : APMessage
+@property (copy) NSString *reason;
+@end
+
 Class MinecraftMessageFactorySC(uint8_t packetId);
