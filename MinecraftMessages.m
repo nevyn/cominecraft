@@ -60,10 +60,18 @@ Class MinecraftMessageFactoryCS(uint8_t packetId)
 	static Class messages[0xff+1] = {Nil};
 	static BOOL inited = NO;
 	if(!inited) {
-		insert(CSKeepAlive);
-		insert(CSLoginRequest);
-		insert(CSHandshake);
-		insert(CSChatMessage);
+		int numClasses = objc_getClassList(NULL, 0);
+		Class *classes = malloc(sizeof(Class)*numClasses);
+		numClasses = objc_getClassList(classes, numClasses);
+		
+		for(int i = 0; i < numClasses; i++) {
+			Class cls = classes[i];
+			if([NSStringFromClass(cls) hasPrefix:@"CS"] && [cls superclass] == [APMessage class])
+				messages[[cls packetId]] = [cls class];
+		}
+		
+		free(classes);
+		
 		inited = YES;
 	}
 	return messages[packetId];
@@ -172,24 +180,18 @@ Class MinecraftMessageFactorySC(uint8_t packetId)
 	static Class messages[0xff+1] = {Nil};
 	static BOOL inited = NO;
 	if(!inited) {
-		insert(SCKeepAlive);
-		insert(SCLoginResponse);
-		insert(SCHandshake);
-		insert(SCChatMessage);
-		insert(SCTimeUpdate);
-		insert(SCPlayerInventory);
-		insert(SCSpawnPosition);
-		insert(SCPlayerPositionAndLook);
-		insert(SCMobSpawn);
-		insert(SCCreateEntity);
-		insert(SCEntityRelativeMove);
-		insert(SCEntityLook);
-		insert(SCEntityLookRelativeMove);
-		insert(SCEntityTeleport);
-		insert(SCAttachEntity);
-		insert(SCPreChunk);
-		insert(SCMapChunk);
-		insert(SCKick);
+		int numClasses = objc_getClassList(NULL, 0);
+		Class *classes = malloc(sizeof(Class)*numClasses);
+		numClasses = objc_getClassList(classes, numClasses);
+		
+		for(int i = 0; i < numClasses; i++) {
+			Class cls = classes[i];
+			if([NSStringFromClass(cls) hasPrefix:@"SC"] && [cls superclass] == [APMessage class])
+				messages[[cls packetId]] = [cls class];
+		}
+		
+		free(classes);
+		
 		inited = YES;
 	}
 	return messages[packetId];
