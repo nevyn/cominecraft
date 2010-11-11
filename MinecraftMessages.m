@@ -24,7 +24,7 @@
 
 Class MinecraftMessageFactoryCS(uint8_t packetId)
 {
-	static Class messages[0xff] = {Nil};
+	static Class messages[0xff+1] = {Nil};
 	static BOOL inited = NO;
 	if(!inited) {
 		insert(CSKeepAlive);
@@ -65,7 +65,7 @@ Class MinecraftMessageFactoryCS(uint8_t packetId)
 
 Class MinecraftMessageFactorySC(uint8_t packetId)
 {
-	static Class messages[0xff] = {Nil};
+	static Class messages[0xff+1] = {Nil};
 	static BOOL inited = NO;
 	if(!inited) {
 		insert(SCKeepAlive);
