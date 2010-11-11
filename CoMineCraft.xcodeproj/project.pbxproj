@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		0556E9D11289D6E600EC4D2F /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 0556E9D01289D6E600EC4D2F /* AsyncSocket.m */; };
+		0588FF1F128B69D300B5F631 /* ASIHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0588FF1E128B69D300B5F631 /* ASIHTTPRequest.m */; };
+		0588FF45128B6A0800B5F631 /* ASIInputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 0588FF44128B6A0800B5F631 /* ASIInputStream.m */; };
+		0588FF65128B6A1E00B5F631 /* libz.1.2.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0588FF64128B6A1E00B5F631 /* libz.1.2.3.dylib */; };
 		05D032301289E2D100B95B50 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05D0322F1289E2D100B95B50 /* SystemConfiguration.framework */; };
 		05D0326C1289E61A00B95B50 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05D0326B1289E61A00B95B50 /* AppKit.framework */; };
 		05D032D21289F09B00B95B50 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05D032D11289F09B00B95B50 /* CoreServices.framework */; };
@@ -35,6 +38,15 @@
 /* Begin PBXFileReference section */
 		0556E9CF1289D6E600EC4D2F /* AsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncSocket.h; sourceTree = "<group>"; };
 		0556E9D01289D6E600EC4D2F /* AsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AsyncSocket.m; sourceTree = "<group>"; };
+		0588FF1D128B69D300B5F631 /* ASIHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIHTTPRequest.h; sourceTree = "<group>"; };
+		0588FF1E128B69D300B5F631 /* ASIHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIHTTPRequest.m; sourceTree = "<group>"; };
+		0588FF20128B69E600B5F631 /* ASIHTTPRequestConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIHTTPRequestConfig.h; sourceTree = "<group>"; };
+		0588FF21128B69E600B5F631 /* ASIHTTPRequestDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIHTTPRequestDelegate.h; sourceTree = "<group>"; };
+		0588FF23128B69FA00B5F631 /* ASICacheDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASICacheDelegate.h; sourceTree = "<group>"; };
+		0588FF24128B69FA00B5F631 /* ASIProgressDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIProgressDelegate.h; sourceTree = "<group>"; };
+		0588FF43128B6A0800B5F631 /* ASIInputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIInputStream.h; sourceTree = "<group>"; };
+		0588FF44128B6A0800B5F631 /* ASIInputStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIInputStream.m; sourceTree = "<group>"; };
+		0588FF64128B6A1E00B5F631 /* libz.1.2.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.3.dylib; path = usr/lib/libz.1.2.3.dylib; sourceTree = SDKROOT; };
 		05D0322F1289E2D100B95B50 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		05D0326B1289E61A00B95B50 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		05D032D11289F09B00B95B50 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -60,12 +72,28 @@
 				05D032301289E2D100B95B50 /* SystemConfiguration.framework in Frameworks */,
 				05D0326C1289E61A00B95B50 /* AppKit.framework in Frameworks */,
 				05D032D21289F09B00B95B50 /* CoreServices.framework in Frameworks */,
+				0588FF65128B6A1E00B5F631 /* libz.1.2.3.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0588FF1C128B69CE00B5F631 /* ASIHR */ = {
+			isa = PBXGroup;
+			children = (
+				0588FF43128B6A0800B5F631 /* ASIInputStream.h */,
+				0588FF44128B6A0800B5F631 /* ASIInputStream.m */,
+				0588FF20128B69E600B5F631 /* ASIHTTPRequestConfig.h */,
+				0588FF21128B69E600B5F631 /* ASIHTTPRequestDelegate.h */,
+				0588FF1D128B69D300B5F631 /* ASIHTTPRequest.h */,
+				0588FF1E128B69D300B5F631 /* ASIHTTPRequest.m */,
+				0588FF23128B69FA00B5F631 /* ASICacheDelegate.h */,
+				0588FF24128B69FA00B5F631 /* ASIProgressDelegate.h */,
+			);
+			path = ASIHR;
+			sourceTree = "<group>";
+		};
 		05D03427128A8E9000B95B50 /* Minecraft */ = {
 			isa = PBXGroup;
 			children = (
@@ -98,6 +126,7 @@
 				08FB7796FE84155DC02AAC07 /* AutoProtoMain.m */,
 				0556E9CF1289D6E600EC4D2F /* AsyncSocket.h */,
 				0556E9D01289D6E600EC4D2F /* AsyncSocket.m */,
+				0588FF1C128B69CE00B5F631 /* ASIHR */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -105,6 +134,7 @@
 		08FB779DFE84155DC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				0588FF64128B6A1E00B5F631 /* libz.1.2.3.dylib */,
 				08FB779EFE84155DC02AAC07 /* Foundation.framework */,
 				05D0322F1289E2D100B95B50 /* SystemConfiguration.framework */,
 				05D0326B1289E61A00B95B50 /* AppKit.framework */,
@@ -184,6 +214,8 @@
 				05D0342A128A8E9F00B95B50 /* AutoProto.m in Sources */,
 				05D0342D128A8EC300B95B50 /* MinecraftMessages.m in Sources */,
 				05D03430128A8ED200B95B50 /* MinecraftClient.m in Sources */,
+				0588FF1F128B69D300B5F631 /* ASIHTTPRequest.m in Sources */,
+				0588FF45128B6A0800B5F631 /* ASIInputStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
