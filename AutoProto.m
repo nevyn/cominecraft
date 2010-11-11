@@ -27,6 +27,13 @@
 +(void)writeMessage:(APMessage*)msg toSocket:(AsyncSocket*)sck;
 @end
 
+@interface APProtoTalker ()
+@property (assign) id currentReadDelegate;
+
+@end
+
+
+
 NSString *APTypeEncodingInPropertyAttribs(NSString *attrs);
 Class APClassFromIdTypeEncoding(NSString *prefix, NSString *idTypeEncoding);
 size_t APSizeOfType(NSString *typeEncoding);
@@ -88,7 +95,7 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 {
 	field = field_;
 	self.msg = msg_;
-	sck.delegate = self;
+	[sck.delegate setCurrentReadDelegate:self];
 	delegate = delegate_;
 	return self;
 }
@@ -99,13 +106,8 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 }
 -(void)notifyDelegateObjectWasRead:obj fromSocket:(AsyncSocket*)sck;
 {
-	sck.delegate = delegate;
+	[sck.delegate setCurrentReadDelegate:delegate];
 	[delegate partReader:self readObject:obj forField:field ofMessage:msg onSocket:sck];
-}
-- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err;
-{
-	[delegate onSocket:sock willDisconnectWithError:err];
-	sock.delegate = delegate;
 }
 
 @end
@@ -113,11 +115,13 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 
 
 @implementation APProtoTalker
-@synthesize delegate;
+@synthesize delegate, currentReadDelegate;
 -(id)initWithSocket:(AsyncSocket*)sock receivedMessageFactory:(APMessageFactory)factory_;
 {
 	sck = [sock retain];
 	sck.delegate = self;
+	currentReadDelegate = self;
+	
 	factory = factory_;
 	
 	[sck readDataToLength:sizeof(uint8_t) withTimeout:-1 tag:0];
@@ -126,6 +130,9 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 }
 - (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(uintptr_t)tag
 {
+	if(currentReadDelegate != self)
+		return [currentReadDelegate onSocket:sock didReadData:data withTag:tag];
+
 	uint8_t packet = *(uint8_t*)[data bytes];
 	
 	APMessage *msg = [[[factory(packet) alloc] init] autorelease];
@@ -141,7 +148,7 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 }
 -(void)messageReader:(id)reader doneReadingMessage:(APMessage*)msg;
 {
-	sck.delegate = self;
+	[sck.delegate setCurrentReadDelegate:self];
 	NSString *specificSelName = [NSString stringWithFormat:@"protoTalker:received%@:", NSStringFromClass([msg class])];
 	SEL specificSel = NSSelectorFromString(specificSelName);
 	if(specificSel && [delegate respondsToSelector:specificSel]) {
@@ -186,7 +193,7 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 		return self;
 	}
 	
-	sck.delegate = self;
+	[sck.delegate setCurrentReadDelegate:self];
 
 	[self readField:0 onSocket:sck];
 	return self;
@@ -269,7 +276,7 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 
 -(void)tellDelegateWeAreDoneOnSocket:(AsyncSocket*)sck;
 {
-	sck.delegate = delegate;
+	[sck.delegate setCurrentReadDelegate:delegate];
 
 	[delegate messageReader:self doneReadingMessage:message];
 }

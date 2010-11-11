@@ -22,6 +22,7 @@ typedef Class(*APMessageFactory)(uint8_t packetId);
 	id delegate;
 	AsyncSocket *sck;
 	APMessageFactory factory;
+	id currentReadDelegate;
 }
 @property (assign) id delegate;
 -(id)initWithSocket:(AsyncSocket*)sck receivedMessageFactory:(APMessageFactory)factory;
