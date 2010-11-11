@@ -56,8 +56,10 @@ int main (int argc, const char * argv[]) {
 	AsyncSocket *server = [[AsyncSocket alloc] initWithDelegate:[asdf new]];
 	[server acceptOnPort:25565 error:nil];
 	
+	NSLog(@"Usage: -user [name] -password [pass] -server [host]");
+		
 	NSError *err;
-	MinecraftClient *client = [[MinecraftClient alloc] initTo:@"localhost" error:&err];
+	MinecraftClient *client = [[MinecraftClient alloc] initTo:[[NSUserDefaults standardUserDefaults] stringForKey:@"server"] error:&err];
 	if(!client) NSLog(@"No client :( %@", err);
 	
 	
