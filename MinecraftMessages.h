@@ -23,7 +23,21 @@
 @property (retain) NSMutableArray *items;
 @end
 
+@interface MCBlockChange : NSObject
+{
+	uint8_t x, y, z;
+	uint8_t type, metadata;
+}
+@property uint8_t x, y, z;
+@property uint8_t type, metadata;
+@end
 
+@interface MCChanges : NSObject
+{
+	NSMutableArray *changes;
+}
+@property (retain) NSMutableArray *changes;
+@end
 
 #pragma mark Client-to-server
 
@@ -149,6 +163,20 @@ typedef enum {
 @property (retain) NSData *chunk;
 @end
 
+@interface SCMultiBlockChange : APMessage
+@property int32_t x, z;
+@property (retain) MCChanges *changes;
+@end
+
+
+@interface SCBlockChange : APMessage
+@property int32_t x, z;
+@property int8_t y;
+@property uint8_t type;
+@property uint8_t metadata;
+@end
+
+
 
 
 @interface SCKick : APMessage
@@ -174,6 +202,16 @@ Class MinecraftMessageFactorySC(uint8_t packetId);
 	int itemsToRead;
 }
 @property (retain) MCInventoryItem *underConstruction;
+-(id)initReadingField:(int)field
+			ofMessage:(APMessage*)msg 
+		   fromSocket:(AsyncSocket*)sck
+			 delegate:delegate;
+@end
+
+@interface APReaderMCChanges : APMessagePartReaderBase
+{
+	MCChanges *changes;
+}
 -(id)initReadingField:(int)field
 			ofMessage:(APMessage*)msg 
 		   fromSocket:(AsyncSocket*)sck

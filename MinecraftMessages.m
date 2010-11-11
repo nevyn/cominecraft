@@ -1,4 +1,5 @@
 #import "MinecraftMessages.h"
+#import <objc/runtime.h>
 
 #pragma mark Model
 @implementation MCInventory
@@ -33,6 +34,32 @@
 
 
 
+@implementation MCChanges
+@synthesize changes;
+-(id)init;
+{
+	changes = [NSMutableArray new];
+	return self;
+}
+-(void)dealloc;
+{
+	[changes release];
+	[super dealloc];
+}
+-(NSString*)description;
+{
+	return [changes description];
+}
+@end
+
+@implementation MCBlockChange
+@synthesize x, y, z, type, metadata;
+@end
+
+
+
+
+
 #pragma mark 
 #pragma mark Client-to-server
 
@@ -51,9 +78,6 @@
 +(uint8_t)packetId; { return 0x03; }
 @synthesize message;
 @end
-
-#define insert(cls) messages[[cls packetId]] = [cls class]
-
 
 Class MinecraftMessageFactoryCS(uint8_t packetId)
 {
@@ -168,6 +192,17 @@ Class MinecraftMessageFactoryCS(uint8_t packetId)
 @synthesize x, y, z, w, h, d, chunk;
 @end
 
+@implementation SCMultiBlockChange
++(uint8_t)packetId; { return 0x34; }
+@synthesize x, z, changes;
+@end
+
+
+@implementation SCBlockChange
++(uint8_t)packetId; { return 0x35; }
+@synthesize x, y, z, type, metadata;
+@end
+
 
 @implementation SCKick
 +(uint8_t)packetId; { return 0xff; }
@@ -231,6 +266,7 @@ enum { ReadingLength, ReadingData};
 }
 @end
 
+
 enum {
 	ReadingItemId, ReadingItemInfo
 };
@@ -268,7 +304,7 @@ enum {
 {
 	if(tag == ReadingItemId) {
 		int16_t itemId;
-		[nsdata getBytes:&itemId length:4];
+		[nsdata getBytes:&itemId length:2];
 		itemId = EndianS16_BtoN(itemId);
 		
 		self.underConstruction = [[MCInventoryItem new] autorelease];
@@ -294,3 +330,81 @@ enum {
 	}
 }
 @end
+
+
+
+enum {
+	ReadingSize, ReadingCoordinates, ReadingTypes, ReadingMetadata
+};
+@implementation APReaderMCChanges
+
+-(id)initReadingField:(int)field_
+			ofMessage:(APMessage*)msg_
+		   fromSocket:(AsyncSocket*)sock
+			 delegate:delegate_;
+{
+	if(![super initReadingField:field_ ofMessage:msg_ fromSocket:sock delegate:delegate_]) return nil;
+	
+	changes = [MCChanges new];
+	
+	[sock readDataToLength:2 withTimeout:1 tag:ReadingSize];
+	return self;
+}
+-(void)dealloc;
+{
+	[changes release];
+	[super dealloc];
+}
+
+- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)nsdata withTag:(uintptr_t)tag
+{
+	if(tag == ReadingSize) {
+		uint16_t size;
+		[nsdata getBytes:&size length:2];
+		size = EndianU16_BtoN(size);
+		
+		for(int i = 0; i < size; i++) {
+			MCBlockChange *change = [MCBlockChange new];
+			[changes.changes addObject:change];
+			[change release];
+		}
+		
+		[sock readDataToLength:size*2 withTimeout:1 tag:ReadingCoordinates];
+	} else if(tag == ReadingCoordinates) {
+		for(int i = 0, c = changes.changes.count; i < c; i++) {
+			union {
+				uint16_t val;
+				struct  {
+					uint8_t x:4;
+					uint8_t z:4;
+					uint8_t y:8; 
+				} __attribute__((__packed__));
+			} coord;
+			[nsdata getBytes:&coord.val range:NSMakeRange(i*2, 2)];
+			coord.val = EndianU16_BtoN(coord.val);
+			MCBlockChange *change = [changes.changes objectAtIndex:i];
+			change.x = coord.x;
+			change.y = coord.y;
+			change.z = coord.z;
+		}
+		[sock readDataToLength:changes.changes.count withTimeout:1 tag:ReadingTypes];
+	} else if(tag == ReadingTypes) {
+		for(int i = 0, c = changes.changes.count; i < c; i++) {
+			MCBlockChange *change = [changes.changes objectAtIndex:i];
+			uint8_t type;
+			[nsdata getBytes:&type range:NSMakeRange(i, 1)];
+			change.type = type;
+		}
+		[sock readDataToLength:changes.changes.count withTimeout:1 tag:ReadingMetadata];
+	} else if(tag == ReadingMetadata) {
+		for(int i = 0, c = changes.changes.count; i < c; i++) {
+			MCBlockChange *change = [changes.changes objectAtIndex:i];
+			uint8_t metadata;
+			[nsdata getBytes:&metadata range:NSMakeRange(i, 1)];
+			change.metadata = metadata;
+		}
+		[self notifyDelegateObjectWasRead:changes fromSocket:sock];
+	}
+}
+@end
+
