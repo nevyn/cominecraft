@@ -54,11 +54,6 @@
 		[_talker sendMessage:request];
 		
 		self.serverJoinRequest = nil;
-		
-		CSChatMessage *msg = [CSChatMessage new];
-		msg.message = @"omg spam spam spam :D";
-		
-		[_talker performSelector:@selector(sendMessage:) withObject:msg afterDelay:1.0];
 	}
 }
 
@@ -98,6 +93,14 @@
 	]]];
 	[self.serverJoinRequest setDelegate:self];
 	[self.serverJoinRequest startAsynchronous];
+}
+-(void)protoTalker:talker receivedSCLoginResponse:(SCLoginResponse*)response;
+{
+	NSLog(@"We're logged in!! %@", response);
+	CSChatMessage *msg = [CSChatMessage new];
+	msg.message = @"omg spam spam spam :D";
+	
+	[_talker sendMessage:msg];
 }
 
 -(void)protoTalker:talker sentMessage:(APMessage*)message;
