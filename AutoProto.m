@@ -222,7 +222,7 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 	}
 	size_t length = APSizeOfType(typeEncoding);
 		
-	[sck readDataToLength:length withTimeout:-1 tag:field];
+	[sck readDataToLength:length withTimeout:1 tag:field];
 }
 -(void)partReader:reader
 	   readObject:obj 
@@ -310,7 +310,7 @@ void APSwapInPlace(void *data, NSString *typeEncoding, size_t length, SwapDirect
 		}
 	}
 	
-	[sck writeData:d withTimeout:-1 tag:(uintptr_t)message];
+	[sck writeData:d withTimeout:1 tag:(uintptr_t)message];
 }
 @end
 
@@ -329,7 +329,7 @@ enum { ReadingLength, ReadingData};
 {
 	if(![super initReadingField:field_ ofMessage:msg_ fromSocket:sck delegate:delegate_]) return nil;
 	
-	[sck readDataToLength:2 withTimeout:-1 tag:ReadingLength];
+	[sck readDataToLength:2 withTimeout:1 tag:ReadingLength];
 
 	return self;
 }
@@ -339,7 +339,11 @@ enum { ReadingLength, ReadingData};
 		uint16_t len;
 		[nsdata getBytes:&len length:2];
 		len = EndianU16_BtoN(len);
-		[sock readDataToLength:len withTimeout:-1 tag:ReadingData];
+		if(len == 0) {
+			[self notifyDelegateObjectWasRead:@"" fromSocket:sock];
+			return;
+		}
+		[sock readDataToLength:len withTimeout:1 tag:ReadingData];
 	} else if(tag == ReadingData) {
 		NSString *s = [[[NSString alloc] initWithData:nsdata encoding:NSUTF8StringEncoding] autorelease];
 		[self notifyDelegateObjectWasRead:s fromSocket:sock];
