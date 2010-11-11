@@ -3228,7 +3228,8 @@ Failed:
             bufferOffset:(NSUInteger)offset
                      tag:(uintptr_t)tag
 {
-	if (length == 0) return;
+	
+	if (length == 0) [NSException raise:NSInvalidArgumentException format:@"Can't read something with length 0"];
 	if (offset > [buffer length]) return;
 	if (theFlags & kForbidReadsWrites) return;
 	
