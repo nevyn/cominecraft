@@ -48,7 +48,7 @@
 		CSLoginRequest *request = [CSLoginRequest new];
 		request.dimension = 0;
 		request.mapSeed = 1234;
-		request.username = @"nevyn";
+		request.username = [[NSUserDefaults standardUserDefaults] stringForKey:@"user"];
 		request.password = @"";
 		request.protocolVersion = 4;
 		[_talker sendMessage:request];
@@ -87,7 +87,7 @@
 	NSLog(@"OMG!! We got a connection hash! %@", handshake.connectionHash);
 	
 	self.serverJoinRequest = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://www.minecraft.net/game/joinserver.jsp?user=%@&sessionId=%@&serverId=%@",
-		@"nevyn",
+		[[NSUserDefaults standardUserDefaults] stringForKey:@"user"],
 		self.sessionId,
 		handshake.connectionHash
 	]]];
