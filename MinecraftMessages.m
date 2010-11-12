@@ -144,6 +144,11 @@ Class MinecraftMessageFactoryCS(uint8_t packetId)
 @synthesize x, stance, y, z, yaw, pitch, onGround;
 @end
 
+@implementation SCNamedEntitySpawn
++(uint8_t)packetId; { return 0x14; }
+@synthesize entityId, entityName, x, y, z, yaw, pitch, itemId;
+@end
+
 @implementation SCMobSpawn
 +(uint8_t)packetId; { return 0x18; }
 @synthesize entityId, mobType, x, y, z, yaw, pitch;

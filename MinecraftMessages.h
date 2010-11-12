@@ -111,6 +111,14 @@ typedef enum {
 @property uint8_t onGround;
 @end
 
+@interface SCNamedEntitySpawn : APMessage
+@property uint32_t entityId;
+@property (copy) NSString *entityName;
+@property int32_t x, y, z;
+@property int8_t yaw, pitch;
+@property int16_t itemId;
+@end
+
 @interface SCMobSpawn : APMessage
 @property uint32_t entityId;
 @property uint8_t mobType;
